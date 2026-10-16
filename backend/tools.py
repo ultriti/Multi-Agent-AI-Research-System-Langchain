@@ -8,8 +8,7 @@ import requests
 from bs4 import BeautifulSoup
 import os
 from firecrawl import Firecrawl
-from langchain_google_genai import ChatGoogleGenerativeAI
-from langchain_core.prompts import ChatPromptTemplate
+
 
 
 from fastapi import APIRouter, HTTPException, Query
@@ -21,14 +20,14 @@ from rich import print
 api_key = os.getenv("FIRECRAWL_API_KEY")
 firecrawl = Firecrawl(api_key=api_key) if api_key else None
 
-# gemini mode
-llm_model = ChatGoogleGenerativeAI(model="gemini-3.5-flash-lite", temperature=0)
 
 
 # -----------------------------
 # create tools
 
 
+# ----------------------------
+# web serach tool
 @tool
 def web_search(query: str, limit: int = Query(5, ge=1, le=5)) -> str:
     """Search the web for recent and reliable information on a topic. Returns Titles, URLs, Snippet"""
@@ -96,10 +95,9 @@ def web_search(query: str, limit: int = Query(5, ge=1, le=5)) -> str:
 #     ]
 # }
 
+
 # ------------------------------
 # web page - scrapping
-
-
 @tool
 def web_page_scrapping(url):
     """Scrape and return clean text content from the given url for deeper reading"""
@@ -117,10 +115,55 @@ def web_page_scrapping(url):
 
         text = soup.get_text(separator="\n", strip=True)
 
-        return text[:4000]  # avoid huge context
+        return text[:3000]  # avoid huge context
 
     except Exception as exc:
         raise HTTPException(
             status_code=502,
             detail=f"News search failed: {str(exc)}",
         )
+
+# ------------------------
+# output for web scrapping 
+
+# print(
+#     web_page_scrapping.invoke(
+#         "https://www.nytimes.com/2026/10/15/world/middleeast/yemen-strike-aden-palace.html"
+#     )
+# )
+
+# Houthi Missiles Strike Government Headquarters in Yemen - The New York Times
+# Advertisement
+# SKIP ADVERTISEMENT
+# You have a preview view of this article while we are checking your access. When we have confirmed access, the full article content will 
+# load.
+# The Houthi militia struck the headquarters of Yemen’s government with a missile barrage on Thursday, killing five people, officials said,
+# as casualties mounted across several fronts of fierce fighting.
+# Additionally, at least 16 people were injured in the Houthi attack on the Maashiq Palace in Aden, the southern Yemeni city that serves as
+# the seat of the country’s internationally recognized government, health officials said.
+# Shaya al-Zindani, the prime minister, was not hurt, according to the Yemeni information minister, Moammar al-Eryani. It was unclear 
+# whether Mr. al-Zindani was present at the time of the attack.
+# While the extent of damage to the palace was unknown, videos shared on social media Thursday show smoke rising from near the building and
+# visible over a mile away.
+# Aden has been the seat of Yemen’s government since 2015, after the Houthis seized the capital city, Sanaa, igniting a decade-long war. 
+# While nominally the official authority in southern Yemen, the government has limited powers there, because in practice it has for years 
+# operated largely from exile in Riyadh, Saudi Arabia.
+# Shortly after the strike on the palace, the Saudi-backed government in Yemen said that Houthi fighters had also launched several 
+# ballistic missiles at Marib, an oil-rich city in central Yemen.
+# We are having trouble retrieving the article content.
+# Please enable JavaScript in your browser settings.
+# Thank you for your patience while we verify access. If you are in Reader mode please exit and
+# log into
+# your Times account, or
+# subscribe
+# for all of The Times.
+# Thank you for your patience while we verify access.
+# Already a subscriber?
+# Log in
+# .
+# Want all of The Times?
+# Subscribe
+# .
+# Related Content
+# Advertisement
+# SKIP ADVERTISEMENT
