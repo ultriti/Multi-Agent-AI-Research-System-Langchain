@@ -1,4 +1,5 @@
 from dotenv import load_dotenv
+
 load_dotenv()
 
 
@@ -78,21 +79,13 @@ def web_search(query: str, limit: int = Query(5, ge=1, le=5)) -> str:
 
 
 # ----------------------------
-# ouput of web serach 
+# ouput of web serach
 
 # print(web_search.invoke("what is recent news of strike?"))
-#{
+# {
 #     'query': 'what is recent news of strike?',
 #     'count': 5,
 #     'articles': [
-#         {
-#             'title': 'US Weighs Using ‘Mother of All Bombs’ in New Iran Strike Plans: Report',
-#             'url': 'https://themedialine.org/headlines/us-weighs-using-mother-of-all-bombs-in-new-iran-strike-plans-report/',
-#             'snippet': 'The US military has developed new options for strikes on Iranian energy infrastructure and nuclear sites that 
-# include the potential first...',
-#             'source': '',
-#             'date': '1 day ago'
-#         },
 #         {
 #             'title': 'Houthi Missiles Strike Government Headquarters in Yemen',
 #             'url': 'https://www.nytimes.com/2026/10/15/world/middleeast/yemen-strike-aden-palace.html',
@@ -100,43 +93,34 @@ def web_search(query: str, limit: int = Query(5, ge=1, le=5)) -> str:
 #             'source': '',
 #             'date': '17 hours ago'
 #         },
-#         {
-#             'title': 'Chicago Hotel Workers Continue Strike Monday as They Seek New Contract',
-#             'url': 'https://news.wttw.com/2026/10/12/chicago-hotel-workers-continue-strike-monday-they-seek-new-contract',
-#             'snippet': '## Chicago Hotel Workers Continue Strike Monday as They Seek New Contract\n![Chicago hotel workers picket as they
-# go on strike on Oct. 9, 2026. (WTTW 
-# News)](https://news.wttw.com/sites/default/files/styles/article_hero/public/field/image/r_hotel_workers_strike_frame_5308_0.jpeg?itok=krY
-# jgwWO)Chicago hotel workers picket as they go on strike on Oct.\n\nThat union represents around 7,000 room attendants, cooks, 
-# dishwashers, front desk agents, servers and other hospitality workers at more than 40 Chicago hotels, who have been without a contract 
-# since Sept.\n\n## [View all sponsors](https://news.wttw.com/sponsors)\n#### Related Stories\n[![Cook County College Teachers Union Local 
-# 1600 members picket outside Harold Washington College on Oct. 2, 2026. (WTTW 
-# News)](https://news.wttw.com/sites/default/files/styles/json_lg/public/field/image/r_city_colleges_strike_date_frame_16566_0.jpeg?itok=WO
-# pz-ndJ)](https://news.wttw.com/2026/10/02/city-colleges-staff-announce-oct-19-strike-date-contract-negotiations-continue)\n\n[City 
-# Colleges Staff Announce Oct. 19 Strike Date as Contract Negotiations 
-# Continue](https://news.wttw.com/2026/10/02/city-colleges-staff-announce-oct-19-strike-date-contract-negotiations-continue)',
-#             'source': '',
-#             'date': '3 days ago'
-#         },
-#         {
-#             'title': 'Could SEIU Local 1000 get a last-minute deal? Mediations start ahead of strike',
-#             'url': 'https://www.sacbee.com/news/politics-government/the-state-worker/article317623453.html',
-#             'snippet': '![SEIU Local 1000 members picketed Wednesday, July 22, 2026, outside the California Department of Human 
-# Resources.](https://www.sacbee.com/public/latest-news/7dx30j/picture316618112/alternates/LANDSCAPE_1200/07-22-26%20SEIU%20picket)\n\nSEIU
-# Local 1000 members picketed Wednesday, July 22, 2026, outside the California Department of Human Resources.\n\n### [SEIU Local 1000 
-# announces one-day strike after members give 
-# authorization](https://www.sacbee.com/news/politics-government/the-state-worker/article317516133.html#storylink=related_inline)\n##### 
-# Get one year of unlimited digital access for $159.99\n###### #ReadLocal\nOnly 44¢ per day\n\n[SUBSCRIBE 
-# NOW](https://mycheckout.sacbee.com/subscribe?ofrgp_id=414&g2i_or_o=OnSite&g2i_or_p=CTA&cid=cta_dynamic-zone_3a_159.99-annually_202307)',
-#             'source': '',
-#             'date': '1 day ago'
-#         },
-#         {
-#             'title': 'New v-c seeks to turn around Goldsmiths as record strike drags on',
-#             'url': 'https://www.timeshighereducation.com/news/new-v-c-seeks-turn-around-goldsmiths-record-strike-drags',
-#             'snippet': 'Exams going unmarked and temporary lecturers causing friction 130 days into industrial action but Joanna Newman 
-# believes she can end crisis...',
-#             'source': '',
-#             'date': '18 hours ago'
-#         }
 #     ]
 # }
+
+# ------------------------------
+# web page - scrapping
+
+
+@tool
+def web_page_scrapping(url):
+    """Scrape and return clean text content from the given url for deeper reading"""
+    try:
+        headers = {"User-Agent": "Mozilla/5.0"}
+
+        response = requests.get(url, headers=headers, timeout=20)
+        response.raise_for_status()
+
+        soup = BeautifulSoup(response.text, "lxml")
+
+        # Remove unwanted tags
+        for tag in soup(["script", "style", "nav", "footer", "header"]):
+            tag.decompose()
+
+        text = soup.get_text(separator="\n", strip=True)
+
+        return text[:4000]  # avoid huge context
+
+    except Exception as exc:
+        raise HTTPException(
+            status_code=502,
+            detail=f"News search failed: {str(exc)}",
+        )
