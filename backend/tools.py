@@ -10,7 +10,6 @@ import os
 from firecrawl import Firecrawl
 
 
-
 from fastapi import APIRouter, HTTPException, Query
 from rich import print
 
@@ -21,7 +20,6 @@ api_key = os.getenv("FIRECRAWL_API_KEY")
 firecrawl = Firecrawl(api_key=api_key) if api_key else None
 
 
-
 # -----------------------------
 # create tools
 
@@ -29,7 +27,7 @@ firecrawl = Firecrawl(api_key=api_key) if api_key else None
 # ----------------------------
 # web serach tool
 @tool
-def web_search(query: str, limit: int = Query(5, ge=1, le=5)) -> str:
+def web_search(query: str) -> str:
     """Search the web for recent and reliable information on a topic. Returns Titles, URLs, Snippet"""
 
     if firecrawl is None:
@@ -99,32 +97,42 @@ def web_search(query: str, limit: int = Query(5, ge=1, le=5)) -> str:
 # ------------------------------
 # web page - scrapping
 @tool
-def web_page_scrapping(url):
-    """Scrape and return clean text content from the given url for deeper reading"""
+def web_page_scrapping(url: str) -> str:
+    """Scrape and return clean text content from the given URL."""
+
     try:
         headers = {"User-Agent": "Mozilla/5.0"}
 
         response = requests.get(url, headers=headers, timeout=20)
-        response.raise_for_status()
+
+        # Don't raise automatically
+        if response.status_code != 200:
+            return f"Unable to scrape URL. " f"HTTP Status: {response.status_code}"
 
         soup = BeautifulSoup(response.text, "lxml")
 
-        # Remove unwanted tags
         for tag in soup(["script", "style", "nav", "footer", "header"]):
             tag.decompose()
 
         text = soup.get_text(separator="\n", strip=True)
 
-        return text[:3000]  # avoid huge context
+        if not text.strip():
+            return "Page loaded but no readable content was found."
+
+        return text[:3000]
+
+    except requests.Timeout:
+        return "Request timed out while scraping the webpage."
+
+    except requests.ConnectionError:
+        return "Could not connect to the webpage."
 
     except Exception as exc:
-        raise HTTPException(
-            status_code=502,
-            detail=f"News search failed: {str(exc)}",
-        )
+        return f"Scraping failed: {str(exc)}"
+
 
 # ------------------------
-# output for web scrapping 
+# output for web scrapping
 
 # print(
 #     web_page_scrapping.invoke(
@@ -135,20 +143,20 @@ def web_page_scrapping(url):
 # Houthi Missiles Strike Government Headquarters in Yemen - The New York Times
 # Advertisement
 # SKIP ADVERTISEMENT
-# You have a preview view of this article while we are checking your access. When we have confirmed access, the full article content will 
+# You have a preview view of this article while we are checking your access. When we have confirmed access, the full article content will
 # load.
 # The Houthi militia struck the headquarters of Yemen’s government with a missile barrage on Thursday, killing five people, officials said,
 # as casualties mounted across several fronts of fierce fighting.
 # Additionally, at least 16 people were injured in the Houthi attack on the Maashiq Palace in Aden, the southern Yemeni city that serves as
 # the seat of the country’s internationally recognized government, health officials said.
-# Shaya al-Zindani, the prime minister, was not hurt, according to the Yemeni information minister, Moammar al-Eryani. It was unclear 
+# Shaya al-Zindani, the prime minister, was not hurt, according to the Yemeni information minister, Moammar al-Eryani. It was unclear
 # whether Mr. al-Zindani was present at the time of the attack.
 # While the extent of damage to the palace was unknown, videos shared on social media Thursday show smoke rising from near the building and
 # visible over a mile away.
-# Aden has been the seat of Yemen’s government since 2015, after the Houthis seized the capital city, Sanaa, igniting a decade-long war. 
-# While nominally the official authority in southern Yemen, the government has limited powers there, because in practice it has for years 
+# Aden has been the seat of Yemen’s government since 2015, after the Houthis seized the capital city, Sanaa, igniting a decade-long war.
+# While nominally the official authority in southern Yemen, the government has limited powers there, because in practice it has for years
 # operated largely from exile in Riyadh, Saudi Arabia.
-# Shortly after the strike on the palace, the Saudi-backed government in Yemen said that Houthi fighters had also launched several 
+# Shortly after the strike on the palace, the Saudi-backed government in Yemen said that Houthi fighters had also launched several
 # ballistic missiles at Marib, an oil-rich city in central Yemen.
 # We are having trouble retrieving the article content.
 # Please enable JavaScript in your browser settings.

@@ -24,7 +24,7 @@ groq_model = ChatGroq(model="openai/gpt-oss-20b", temperature=0)
 # 1st agent - web search
 def build_search_agent():
     return create_agent(
-        model=groq_model,
+        model=gemini_model,
         tools=[web_search],
     )
 
@@ -32,7 +32,7 @@ def build_search_agent():
 # -----------------------------
 # 2nd agent - web scrapping and info scrappin
 def build_reader_agent():
-    return create_agent(model=groq_model, tools=[web_page_scrapping])
+    return create_agent(model=gemini_model, tools=[web_page_scrapping])
 
 
 # ----------------------------------
@@ -107,7 +107,3 @@ critics_prompt = ChatPromptTemplate.from_messages(
 
 # critic chain ---------------------
 critics_chain = critics_prompt | groq_model | StrOutputParser()
-
-
-
-
