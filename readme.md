@@ -104,7 +104,7 @@ LangChain/Gemini-based research workflow.
 ```mermaid
 flowchart LR
     User[User] --> UI[React + Vite frontend]
-    UI -->|POST /api/research; topic JSON| API[FastAPI API]
+    UI -->|POST /research; topic JSON| API[FastAPI API]
     API --> Pipeline[Sequential research pipeline]
     Pipeline --> SearchAgent[Search agent]
     SearchAgent --> Firecrawl[Firecrawl news search]
@@ -131,7 +131,8 @@ flowchart LR
 | External research tools | `backend/tools.py` | Performs Firecrawl news search and HTTP-based page text extraction. |
 | Alternate step API | `backend/server.py` | Exposes separate `/api/search`, `/api/read`, `/api/write`, and `/api/critic` endpoints. |
 
-`backend/main.py` is the module used by the frontend's `/api/research` flow.
+`backend/main.py` is the module used by the frontend's `/research` flow. The
+same handler remains available at `/api/research` for backwards compatibility.
 `backend/server.py` is a separate API implementation exposing individual
 stages; it is not called by the current frontend. Both define a FastAPI
 application named `app`, so the selected module matters when starting Uvicorn.
@@ -177,7 +178,7 @@ application named `app`, so the selected module matters when starting Uvicorn.
 sequenceDiagram
     actor User
     participant Browser as React frontend
-    participant API as FastAPI (/api/research)
+    participant API as FastAPI (/research)
     participant Flow as Pipeline
     participant Search as Gemini search agent
     participant Firecrawl
@@ -249,7 +250,7 @@ code-level settings, not user-selectable settings in the interface.
 
 ## 9. API reference
 
-### `POST /api/research` — streaming workflow
+### `POST /research` — streaming workflow
 
 **Application module:** `backend/main.py`
 
@@ -262,8 +263,9 @@ Request:
 Response: `text/event-stream`, containing status events followed by either a
 result event or an error event.
 
-This is the endpoint used by the current frontend. The frontend's API base URL
-is currently hard-coded to `http://localhost:8000/api`.
+This is the endpoint used by the current frontend. The same handler is
+available at `POST /api/research` as a backwards-compatible alias. The
+frontend's API base URL is configured with `VITE_BASE_URL`.
 
 ### Alternate stage endpoints
 
@@ -319,7 +321,7 @@ python -m uvicorn main:app --reload --host 127.0.0.1 --port 8000
 ```
 
 The API is then available locally at `http://127.0.0.1:8000`; the streaming
-route is `POST /api/research`.
+route is `POST /research` (also available at `POST /api/research`).
 
 The backend requirements include the direct dependencies used by the API,
 agent integrations, and web-research tools. Install them from
@@ -335,9 +337,10 @@ npm install
 npm run dev
 ```
 
-Open the local Vite URL printed in the terminal (the API CORS configuration
-currently allows `http://localhost:5173`). The frontend expects the backend
-at `http://localhost:8000`.
+Open the local Vite URL printed in the terminal. The API CORS configuration
+allows `http://localhost:5173` and the deployed Netlify origin. Set
+`VITE_BASE_URL` to the backend base URL, for example
+`http://localhost:8000` locally.
 
 ### Build and lint the frontend
 
@@ -353,8 +356,8 @@ npm run lint
 
 - Backend credentials are loaded with `python-dotenv`.
 - The streaming frontend API URL is fixed in `frontend/src/api.js`.
-- Backend CORS permits the Vite development origin
-  `http://localhost:5173`.
+- Backend CORS permits the Vite development origin and the deployed Netlify
+  frontend origin.
 - Model names and temperatures are configured in `backend/agents.py`.
 - The news search result limit and scraped-text limits are fixed in
   `backend/tools.py` and `backend/pipelin.py`.
@@ -397,8 +400,8 @@ least the following:
    limits, and suitable timeouts for all model and provider operations.
 3. **Protect the API.** Add authentication/authorization where required,
    rate limiting, concurrency limits, and abuse monitoring.
-4. **Configure CORS for deployment.** Replace the localhost-only origin with
-   an explicit production allowlist; do not use permissive origins by default.
+4. **Configure CORS for deployment.** Keep the allowlist limited to the
+   frontend origins actually in use; do not use permissive origins by default.
 5. **Avoid leaking exceptions.** Return safe client errors and log detailed
    diagnostics server-side without exposing provider internals or secrets.
 6. **Handle cancellation and disconnects.** Ensure provider calls and worker
@@ -438,11 +441,12 @@ to exist in the current implementation.
   beyond Markdown, or feedback correction loop.
 - The UI does not show the raw source list as a separately structured
   citation panel.
-- The API URL and allowed CORS origin are local-development settings.
+- The API URL is supplied through `VITE_BASE_URL`; update the backend CORS
+  allowlist when the deployed frontend origin changes.
 - The repository does not currently contain a root-level installation guide,
   automated test suite, container configuration, or deployment manifests.
-- Several packages imported by the backend are not declared explicitly in
-  the current requirements file (see the dependency note above).
+- Backend dependencies are listed in `backend/requirements.txt`; versions are
+  not pinned.
 
 ## 15. Suggested production roadmap
 

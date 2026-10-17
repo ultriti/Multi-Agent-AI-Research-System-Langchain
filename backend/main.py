@@ -9,11 +9,18 @@ from pydantic import BaseModel
 
 from pipelin import run_search_pipeline
 
+from dotenv import load_dotenv
+
+load_dotenv()
+
 app = FastAPI(title="ResearchMind API")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173","https://multiagent-ai-system.netlify.app/"],
+    allow_origins=[
+        FRONTEND_URL,
+        FRONTEND_URL_2,
+    ],
     allow_methods=["*"],
     allow_headers=["*"],
 )
@@ -23,7 +30,8 @@ class ResearchReq(BaseModel):
     topic: str
 
 
-@app.post("/api/research")
+@app.post("/research")
+@app.post("/research", include_in_schema=False)
 def research(req: ResearchReq):
     events = queue.Queue()
     current = {"step": None}  # remembers which step is running, for error reporting
@@ -35,12 +43,14 @@ def research(req: ResearchReq):
     def worker():
         try:
             state = run_search_pipeline(req.topic, on_step=on_step)
-            events.put({
-                "type": "result",
-                "report": state["report"],
-                "feedback": state["feedback"],
-                "sources": state["sources"],
-            })
+            events.put(
+                {
+                    "type": "result",
+                    "report": state["report"],
+                    "feedback": state["feedback"],
+                    "sources": state["sources"],
+                }
+            )
         except Exception as e:
             events.put({"type": "error", "step": current["step"], "message": str(e)})
         finally:
