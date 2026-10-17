@@ -321,11 +321,9 @@ python -m uvicorn main:app --reload --host 127.0.0.1 --port 8000
 The API is then available locally at `http://127.0.0.1:8000`; the streaming
 route is `POST /api/research`.
 
-**Dependency note:** `backend/tools.py` imports `bs4`, uses the `lxml` parser,
-and imports `rich`, while those packages are not explicitly listed in the
-current `backend/requirements.txt`. A clean environment may therefore need
-the project dependency manifest updated to include `beautifulsoup4`, `lxml`,
-and `rich` before installation.
+The backend requirements include the direct dependencies used by the API,
+agent integrations, and web-research tools. Install them from
+`backend/requirements.txt` in a clean virtual environment.
 
 ### Install and start the frontend
 

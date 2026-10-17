@@ -73,7 +73,11 @@ def search_news(query: str) -> NewsSearchResult:
                     "date": get("date") or "",
                 }
             )
-
+        
+        # print("\n"+"="*50)
+        # print("query", query,"count", len(articles),"articles": articles)
+        # print("\n"+"="*50)
+         
         return {
             "query": query,
             "count": len(articles),
