@@ -1,13 +1,104 @@
 @import "tailwindcss";
 @plugin "@tailwindcss/typography";
 
-/* *{
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-} */
+/* ── Design tokens ─────────────────────────────────── */
+:root {
+  --bg-base: #07070c;
+  --bg-raised: #0e0e14;
+  --bg-surface: #14141d;
+  --bg-surface-hover: #1a1a26;
+  --border-subtle: rgba(255, 255, 255, 0.06);
+  --border-default: rgba(255, 255, 255, 0.1);
+  --border-focus: #e07a2f;
+  --text-primary: #f0f0f3;
+  --text-secondary: #9d9da8;
+  --text-tertiary: #64646e;
+  --accent: #e07a2f;
+  --accent-muted: rgba(224, 122, 47, 0.12);
+  --accent-hover: #c86a24;
+  --success: #34c759;
+  --success-muted: rgba(52, 199, 89, 0.1);
+  --danger: #ef4444;
+  --danger-muted: rgba(239, 68, 68, 0.08);
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.4), 0 0 0 1px var(--border-subtle);
+}
+
+/* ── Reset & base ──────────────────────────────────── */
+html {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
 body {
-  background: #07070c;
-  color: #e5e7eb;
-  font-family: system-ui, sans-serif;
+  background: var(--bg-base);
+  color: var(--text-primary);
+  font-family: "Inter", system-ui, -apple-system, sans-serif;
+  line-height: 1.6;
+  min-height: 100vh;
+}
+
+/* ── Custom scrollbar ──────────────────────────────── */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.14);
+}
+
+/* ── Focus visible ─────────────────────────────────── */
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* ── Selection ─────────────────────────────────────── */
+::selection {
+  background: rgba(224, 122, 47, 0.3);
+  color: #fff;
+}
+
+/* ── Animations ────────────────────────────────────── */
+@keyframes fade-in {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fade-in-up {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes pulse-ring {
+  0%   { transform: scale(0.8); opacity: 0.6; }
+  70%  { transform: scale(1.4); opacity: 0; }
+  100% { transform: scale(1.4); opacity: 0; }
+}
+
+@keyframes shimmer {
+  0%   { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+@keyframes spin-smooth {
+  to { transform: rotate(360deg); }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.35s ease-out both;
+}
+
+.animate-fade-in-up {
+  animation: fade-in-up 0.45s ease-out both;
 }

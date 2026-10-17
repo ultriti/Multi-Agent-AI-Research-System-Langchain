@@ -4,6 +4,7 @@ load_dotenv()
 
 
 from langchain.tools import tool
+from typing import TypedDict
 import requests
 from bs4 import BeautifulSoup
 import os
@@ -20,16 +21,27 @@ api_key = os.getenv("FIRECRAWL_API_KEY")
 firecrawl = Firecrawl(api_key=api_key) if api_key else None
 
 
+class NewsArticle(TypedDict):
+    title: str
+    url: str
+    snippet: str
+    source: str
+    date: str
+
+
+class NewsSearchResult(TypedDict):
+    query: str
+    count: int
+    articles: list[NewsArticle]
+
+
 # -----------------------------
 # create tools
 
 
 # ----------------------------
 # web serach tool
-@tool
-def web_search(query: str) -> str:
-    """Search the web for recent and reliable information on a topic. Returns Titles, URLs, Snippet"""
-
+def search_news(query: str) -> NewsSearchResult:
     if firecrawl is None:
         raise HTTPException(
             status_code=500,
@@ -45,7 +57,7 @@ def web_search(query: str) -> str:
         # Current SDK groups results by source type.
         items = getattr(result, "news", None) or []
 
-        articles = []
+        articles: list[NewsArticle] = []
         for item in items:
             if isinstance(item, dict):
                 get = item.get
@@ -54,11 +66,11 @@ def web_search(query: str) -> str:
 
             articles.append(
                 {
-                    "title": get("title", ""),
-                    "url": get("url", ""),
-                    "snippet": get("snippet") or get("description", ""),
-                    "source": get("source", ""),
-                    "date": get("date", ""),
+                    "title": get("title") or "",
+                    "url": get("url") or "",
+                    "snippet": get("snippet") or get("description") or "",
+                    "source": get("source") or "",
+                    "date": get("date") or "",
                 }
             )
 
@@ -73,6 +85,12 @@ def web_search(query: str) -> str:
             status_code=502,
             detail=f"News search failed: {str(exc)}",
         )
+
+
+@tool
+def web_search(query: str) -> NewsSearchResult:
+    """Search the web for recent and reliable information on a topic. Returns titles, URLs, and snippets."""
+    return search_news(query)
 
 
 # ----------------------------

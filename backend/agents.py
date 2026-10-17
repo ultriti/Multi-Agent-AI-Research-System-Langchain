@@ -58,16 +58,17 @@ writer_prompt = ChatPromptTemplate.from_messages(
                 - Introduction
                 - Key Findings (minimum 3 well-explained points)
                 - Conclusion
-                - Sources (list all URLs found in the research)
 
-                Be detailed, factual and professional.
+                Be detailed, factual and professional. Use only source URLs supplied in
+                the research and do not invent citations; the verified source list will be
+                appended to the report.
             """,
         ),
     ]
 )
 
 # writer chain ------------------
-writer_chain = writer_prompt | groq_model | StrOutputParser()
+writer_chain = writer_prompt | gemini_model | StrOutputParser()
 
 
 # --------------------------------
@@ -106,4 +107,4 @@ critics_prompt = ChatPromptTemplate.from_messages(
 )
 
 # critic chain ---------------------
-critics_chain = critics_prompt | groq_model | StrOutputParser()
+critics_chain = critics_prompt | gemini_model | StrOutputParser()

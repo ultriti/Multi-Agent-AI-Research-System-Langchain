@@ -39,6 +39,7 @@ def research(req: ResearchReq):
                 "type": "result",
                 "report": state["report"],
                 "feedback": state["feedback"],
+                "sources": state["sources"],
             })
         except Exception as e:
             events.put({"type": "error", "step": current["step"], "message": str(e)})
