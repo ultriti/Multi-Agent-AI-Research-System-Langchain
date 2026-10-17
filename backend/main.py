@@ -12,21 +12,23 @@ from pipelin import run_search_pipeline
 from dotenv import load_dotenv
 import os
 
-load_dotenv()
-
 app = FastAPI(title="ResearchMind API")
 
 load_dotenv()
 
-FRONTEND_URL = os.getenv("FRONTEND_URL")
-FRONTEND_URL_2 = os.getenv("FRONTEND_URL_2")
+allowed_origins = {
+    "http://localhost:5173",
+    "https://multiagent-ai-system.netlify.app",
+}
+allowed_origins.update(
+    origin.rstrip("/")
+    for name in ("FRONTEND_URL", "FRONTEND_URL_2")
+    if (origin := os.getenv(name))
+)
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        FRONTEND_URL,
-        FRONTEND_URL_2,
-    ],
+    allow_origins=sorted(allowed_origins),
     allow_methods=["*"],
     allow_headers=["*"],
 )
@@ -36,7 +38,6 @@ class ResearchReq(BaseModel):
     topic: str
 
 
-@app.post("/research")
 @app.post("/research", include_in_schema=False)
 def research(req: ResearchReq):
     events = queue.Queue()

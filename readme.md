@@ -355,9 +355,12 @@ npm run lint
 ### Configuration currently present
 
 - Backend credentials are loaded with `python-dotenv`.
-- The streaming frontend API URL is fixed in `frontend/src/api.js`.
+- The streaming frontend API URL is configured with `VITE_BASE_URL`.
 - Backend CORS permits the Vite development origin and the deployed Netlify
   frontend origin.
+- Additional frontend origins may be configured through `FRONTEND_URL` and
+  `FRONTEND_URL_2` in the backend environment; values may include a trailing
+  slash.
 - Model names and temperatures are configured in `backend/agents.py`.
 - The news search result limit and scraped-text limits are fixed in
   `backend/tools.py` and `backend/pipelin.py`.
