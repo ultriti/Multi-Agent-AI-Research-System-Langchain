@@ -1,4 +1,4 @@
-const BASE = "http://localhost:8000/api";
+const BASE = import.meta.env.VITE_BASE_URL;
 
 // Sends only the topic, then calls onEvent for every status/result/error the server streams back
 export async function runResearch(topic, onEvent) {
