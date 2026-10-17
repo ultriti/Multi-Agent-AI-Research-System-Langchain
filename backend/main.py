@@ -10,10 +10,16 @@ from pydantic import BaseModel
 from pipelin import run_search_pipeline
 
 from dotenv import load_dotenv
+import os
 
 load_dotenv()
 
 app = FastAPI(title="ResearchMind API")
+
+load_dotenv()
+
+FRONTEND_URL = os.getenv("FRONTEND_URL")
+FRONTEND_URL_2 = os.getenv("FRONTEND_URL_2")
 
 app.add_middleware(
     CORSMiddleware,
