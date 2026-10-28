@@ -6,7 +6,7 @@ export default function AboutPage() {
       <h1 className="mb-4 text-3xl font-bold text-white">About ResearchMind</h1>
       <p className="mb-8 text-gray-400">
         ResearchMind is a multi-agent research pipeline built with LangChain and Gemini.
-        Enter a topic and four agents work in sequence to produce a reviewed report.
+        Enter a topic and the four-stage workflow produces a report and a separate review.
       </p>
       <ol className="space-y-3">
         {STEPS.map((s, i) => (
